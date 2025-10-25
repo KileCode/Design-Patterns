@@ -1,73 +1,29 @@
-# Makefile for Iterator Design Pattern Demo
-
-# Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra -O2
-DEBUGFLAGS = -std=c++11 -Wall -Wextra -g -O0 -DDEBUG
+CXXFLAGS = -std=c++11 -Wall -g
 
-# Target executable name
-TARGET = iterator_demo
+TARGET = game
 
-# Source files
-SOURCES = main.cpp Queue.cpp QueueIterator.cpp CircularList.cpp
-HEADERS = Queue.h QueueIterator.h CircularList.h
+SRCS = main.cpp WeaponInventory.cpp WeaponIterator.cpp
+OBJS = $(SRCS:.cpp=.o)
 
-# Object files
-OBJECTS = $(SOURCES:.cpp=.o)
-
-# Default target
 all: $(TARGET)
 
-# Build the main executable
-$(TARGET): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJECTS)
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 
-# Build object files
-%.o: %.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+main.o: main.cpp WeaponInventory.h WeaponIterator.h Iterator.h Item.h Node.h
+	$(CXX) $(CXXFLAGS) -c main.cpp
 
-# Debug build
-debug: CXXFLAGS = $(DEBUGFLAGS)
-debug: clean $(TARGET)
+WeaponInventory.o: WeaponInventory.cpp WeaponInventory.h WeaponIterator.h Node.h Item.h
+	$(CXX) $(CXXFLAGS) -c WeaponInventory.cpp
 
-# Clean build files
+WeaponIterator.o: WeaponIterator.cpp WeaponIterator.h Iterator.h WeaponInventory.h Item.h Node.h
+	$(CXX) $(CXXFLAGS) -c WeaponIterator.cpp
+
 clean:
-	rm -f $(OBJECTS) $(TARGET)
+	rm -f $(OBJS) $(TARGET)
 
-# Clean and rebuild
-rebuild: clean $(TARGET)
-
-# Run the program
 run: $(TARGET)
 	./$(TARGET)
 
-# Install (copy to /usr/local/bin - requires sudo)
-install: $(TARGET)
-	cp $(TARGET) /usr/local/bin/
-
-# Uninstall
-uninstall:
-	rm -f /usr/local/bin/$(TARGET)
-
-# Help
-help:
-	@echo "Available targets:"
-	@echo "  all      - Build the program (default)"
-	@echo "  debug    - Build with debug symbols"
-	@echo "  clean    - Remove build files"
-	@echo "  rebuild  - Clean and build"
-	@echo "  run      - Build and run the program"
-	@echo "  install  - Install to /usr/local/bin (requires sudo)"
-	@echo "  uninstall- Remove from /usr/local/bin (requires sudo)"
-	@echo "  help     - Show this help message"
-
-# Check for memory leaks (requires valgrind)
-memcheck: $(TARGET)
-	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET)
-
-# Generate assembly output
-assembly: main.cpp Queue.cpp
-	$(CXX) $(CXXFLAGS) -S main.cpp Queue.cpp
-
-# Phony targets
-.PHONY: all debug clean rebuild run install uninstall help memcheck assembly
+.PHONY: all clean run
